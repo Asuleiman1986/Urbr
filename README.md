@@ -1,3 +1,8 @@
+<div style="margin-top:8px; color:rgba(209,232,238,0.75); font-size:12px;">
+(Les boutons BROKER filtrent le tableau, et le donut se met à jour sur les lignes actives)
+</div>
+
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
