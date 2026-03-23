@@ -3,9 +3,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class Cocotte extends Arcturus {
 
-    private boolean inCashSummary = false;
+    private boolean cashSummarySeen = false;
+    private boolean inTargetCashSummary = false;
+    private boolean stopParsing = false;
+
     private boolean expectingDescription = false;
     private boolean expectingHeaders = false;
     private boolean insideDataBlock = false;
@@ -22,8 +24,11 @@ public class Cocotte extends Arcturus {
 
     @Override
     public Object get(Object object) throws Exception {
-        Map row = (Map) object;
+        if (stopParsing) {
+            return null;
+        }
 
+        Map row = (Map) object;
         String col0 = getValue(row, "COLUMN_0");
         String col1 = getValue(row, "COLUMN_1");
 
@@ -31,27 +36,30 @@ public class Cocotte extends Arcturus {
             return null;
         }
 
-        // 1. On commence seulement à partir de Cash Summary
-        if (!inCashSummary) {
-            if ("Cash Summary".equalsIgnoreCase(col0)) {
-                inCashSummary = true;
-                expectingDescription = true;
-            }
-            return null;
-        }
-
-        // 2. Fin totale de la section Cash Summary si on arrive sur Excess/Deficit
+        // Fin de la section cible
         if ("Excess/Deficit".equalsIgnoreCase(col0)) {
-            inCashSummary = false;
-            expectingDescription = false;
-            expectingHeaders = false;
-            insideDataBlock = false;
-            currentDescription = null;
-            currentHeaders.clear();
+            if (inTargetCashSummary) {
+                stopParsing = true;
+            }
+            resetCurrentSubBlock();
             return null;
         }
 
-        // 3. Ligne description : LL-CARMSECU_CAS, LL-CARMSECU_CRL...
+        // Détection d'un Cash Summary
+        if ("Cash Summary".equalsIgnoreCase(col0)) {
+            cashSummarySeen = true;
+            inTargetCashSummary = false;
+            resetCurrentSubBlock();
+            expectingDescription = true;
+            return null;
+        }
+
+        // Tant qu'on n'a pas vu de Cash Summary, on ignore
+        if (!cashSummarySeen) {
+            return null;
+        }
+
+        // Ligne description
         if (expectingDescription) {
             if (!col0.isEmpty() && col1.isEmpty() && !isTotalLine(col0)) {
                 currentDescription = col0;
@@ -61,30 +69,48 @@ public class Cocotte extends Arcturus {
             return null;
         }
 
-        // 4. Ligne header juste après la description
+        // Ligne header
         if (expectingHeaders) {
             currentHeaders = extractHeaders(row);
+
+            // On démarre seulement si ce header contient "Opening"
+            if (containsHeader(currentHeaders, "T Opening Balance")) {
+                inTargetCashSummary = true;
+                insideDataBlock = true;
+            } else {
+                // mauvais Cash Summary ou mauvais sous-bloc
+                insideDataBlock = false;
+            }
+
             expectingHeaders = false;
-            insideDataBlock = true;
             return null;
         }
 
-        // 5. Si on rencontre Total, on ferme le sous-bloc courant
+        // Ligne Total => fin du sous-bloc courant
         if (isTotalLine(col0)) {
             insideDataBlock = false;
-            expectingDescription = true;
-            expectingHeaders = false;
-            currentHeaders.clear();
             currentDescription = null;
+            currentHeaders.clear();
+
+            // Tant qu'on est dans la bonne section Cash Summary,
+            // on peut attendre un autre sous-bloc
+            if (!stopParsing) {
+                expectingDescription = true;
+            }
             return null;
         }
 
-        // 6. Si on n'est pas dans un sous-bloc data, on ignore
+        // Si on n'est pas dans le bon Cash Summary, on ignore
+        if (!inTargetCashSummary) {
+            return null;
+        }
+
+        // Si on n'est pas dans un bloc de données, on ignore
         if (!insideDataBlock) {
             return null;
         }
 
-        // 7. Construire la ligne résultat
+        // Construire la ligne résultat
         TreeMap<String, String> parsedRow = new TreeMap<>();
         parsedRow.put("DESCRIPTION", currentDescription);
 
@@ -98,12 +124,33 @@ public class Cocotte extends Arcturus {
             parsedRow.put(header, value);
         }
 
-        if (isOnlyMetadata(parsedRow)) {
+        if (hasNoData(parsedRow)) {
             return null;
         }
 
         result.put(resultIndex++, parsedRow);
         return parsedRow;
+    }
+
+    private void resetCurrentSubBlock() {
+        expectingDescription = false;
+        expectingHeaders = false;
+        insideDataBlock = false;
+        currentDescription = null;
+        currentHeaders.clear();
+    }
+
+    private boolean containsHeader(List<String> headers, String searchedText) {
+        if (headers == null || searchedText == null) {
+            return false;
+        }
+
+        for (String header : headers) {
+            if (header != null && header.toUpperCase().contains(searchedText.toUpperCase())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String getHeader(int index) {
@@ -140,7 +187,7 @@ public class Cocotte extends Arcturus {
         return true;
     }
 
-    private boolean isOnlyMetadata(TreeMap<String, String> row) {
+    private boolean hasNoData(TreeMap<String, String> row) {
         for (Map.Entry<String, String> entry : row.entrySet()) {
             if (!"DESCRIPTION".equals(entry.getKey())
                     && entry.getValue() != null
