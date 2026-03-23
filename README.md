@@ -3,37 +3,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+public class Cocotte extends Arcturus {
 
-
-    private String produitWanted = "IRS";
-    private String clientWanted = "CARMSECU_LCH";
-
-    private String currentProduit = null;
-    private String currentClient = null;
-    private List<String> currentHeaders = new ArrayList<>();
-
-    private boolean expectingClient = false;
+    private boolean inCashSummary = false;
+    private boolean expectingDescription = false;
     private boolean expectingHeaders = false;
-    private boolean insideWantedBlock = false;
+    private boolean insideDataBlock = false;
+
+    private String currentDescription = null;
+    private List<String> currentHeaders = new ArrayList<>();
 
     private int resultIndex = 1;
     private TreeMap<Integer, TreeMap<String, String>> result = new TreeMap<>();
-
-    public Cocotte() {
-    }
-
-    public Cocotte(String produitWanted, String clientWanted) {
-        this.produitWanted = produitWanted;
-        this.clientWanted = clientWanted;
-    }
-
-    public void setProduitWanted(String produitWanted) {
-        this.produitWanted = produitWanted;
-    }
-
-    public void setClientWanted(String clientWanted) {
-        this.clientWanted = clientWanted;
-    }
 
     public TreeMap<Integer, TreeMap<String, String>> getResult() {
         return result;
@@ -50,51 +31,62 @@ import java.util.TreeMap;
             return null;
         }
 
-        // 1) Détection produit
-        if (isProduitLine(row)) {
-            currentProduit = col0;
-            currentClient = null;
-            currentHeaders.clear();
+        // 1. On commence seulement à partir de Cash Summary
+        if (!inCashSummary) {
+            if ("Cash Summary".equalsIgnoreCase(col0)) {
+                inCashSummary = true;
+                expectingDescription = true;
+            }
+            return null;
+        }
 
-            expectingClient = true;
+        // 2. Fin totale de la section Cash Summary si on arrive sur Excess/Deficit
+        if ("Excess/Deficit".equalsIgnoreCase(col0)) {
+            inCashSummary = false;
+            expectingDescription = false;
             expectingHeaders = false;
-            insideWantedBlock = false;
+            insideDataBlock = false;
+            currentDescription = null;
+            currentHeaders.clear();
             return null;
         }
 
-        // 2) Détection client juste après produit
-        if (expectingClient) {
-            currentClient = col0;
-            expectingClient = false;
-            expectingHeaders = true;
-
-            insideWantedBlock = matches(currentProduit, produitWanted)
-                    && matches(currentClient, clientWanted);
+        // 3. Ligne description : LL-CARMSECU_CAS, LL-CARMSECU_CRL...
+        if (expectingDescription) {
+            if (!col0.isEmpty() && col1.isEmpty() && !isTotalLine(col0)) {
+                currentDescription = col0;
+                expectingDescription = false;
+                expectingHeaders = true;
+            }
             return null;
         }
 
-        // 3) Détection headers
+        // 4. Ligne header juste après la description
         if (expectingHeaders) {
             currentHeaders = extractHeaders(row);
             expectingHeaders = false;
+            insideDataBlock = true;
             return null;
         }
 
-        // 4) Ignorer toutes les lignes Total
-        // ex: Total: EUR, Total: HUF, Total: USD, Total: CAma, Total: IRS
+        // 5. Si on rencontre Total, on ferme le sous-bloc courant
         if (isTotalLine(col0)) {
+            insideDataBlock = false;
+            expectingDescription = true;
+            expectingHeaders = false;
+            currentHeaders.clear();
+            currentDescription = null;
             return null;
         }
 
-        // 5) Si on n'est pas dans le bloc demandé, ignorer
-        if (!insideWantedBlock) {
+        // 6. Si on n'est pas dans un sous-bloc data, on ignore
+        if (!insideDataBlock) {
             return null;
         }
 
-        // 6) Construire la ligne résultat
+        // 7. Construire la ligne résultat
         TreeMap<String, String> parsedRow = new TreeMap<>();
-        parsedRow.put("PRODUIT", currentProduit);
-        parsedRow.put("CLIENT", currentClient);
+        parsedRow.put("DESCRIPTION", currentDescription);
 
         for (int i = 0; i <= 13; i++) {
             String header = getHeader(i);
@@ -129,43 +121,8 @@ import java.util.TreeMap;
         return headers;
     }
 
-    private boolean matches(String currentValue, String wantedValue) {
-        if (wantedValue == null || wantedValue.trim().isEmpty()) {
-            return true;
-        }
-        if (currentValue == null) {
-            return false;
-        }
-        return currentValue.trim().equalsIgnoreCase(wantedValue.trim());
-    }
-
-    private boolean isProduitLine(Map row) {
-        String col0 = getValue(row, "COLUMN_0");
-        String col1 = getValue(row, "COLUMN_1");
-
-        if (col0.isEmpty() || !col1.isEmpty()) {
-            return false;
-        }
-
-        String v = col0.trim().toUpperCase();
-
-        if (v.startsWith("TOTAL")) {
-            return false;
-        }
-
-        return v.equals("IRS")
-                || v.equals("ZCIS")
-                || v.equals("CDS INDEX")
-                || v.equals("CDS")
-                || v.equals("TRS")
-                || v.equals("FX");
-    }
-
     private boolean isTotalLine(String value) {
-        if (value == null) {
-            return false;
-        }
-        return value.trim().toUpperCase().startsWith("TOTAL");
+        return value != null && value.trim().toUpperCase().startsWith("TOTAL");
     }
 
     private String getValue(Map row, String key) {
@@ -185,13 +142,9 @@ import java.util.TreeMap;
 
     private boolean isOnlyMetadata(TreeMap<String, String> row) {
         for (Map.Entry<String, String> entry : row.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-
-            if (!"PRODUIT".equals(key)
-                    && !"CLIENT".equals(key)
-                    && value != null
-                    && !value.trim().isEmpty()) {
+            if (!"DESCRIPTION".equals(entry.getKey())
+                    && entry.getValue() != null
+                    && !entry.getValue().trim().isEmpty()) {
                 return false;
             }
         }
