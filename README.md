@@ -1,200 +1,154 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+{
+  label:'Close Selected Tickets',
+  onClick:function(e,tabID) {
+    console.log(tabID);
 
+    let table = Tabulator.findTable("#"+tabID+"-Result")[0];
 
-    private boolean cashSummarySeen = false;
-    private boolean inTargetCashSummary = false;
-    private boolean stopParsing = false;
-
-    private boolean expectingDescription = false;
-    private boolean expectingHeaders = false;
-    private boolean insideDataBlock = false;
-
-    private String currentDescription = null;
-    private List<String> currentHeaders = new ArrayList<>();
-
-    private int resultIndex = 1;
-    private TreeMap<Integer, TreeMap<String, String>> result = new TreeMap<>();
-
-    public TreeMap<Integer, TreeMap<String, String>> getResult() {
-        return result;
+    if (!table) {
+      alert("Table not found");
+      return;
     }
 
-    @Override
-    public Object get(Object object) throws Exception {
-        if (stopParsing) {
-            return null;
-        }
+    let rows = table.getSelectedRows();
 
-        Map row = (Map) object;
-        String col0 = getValue(row, "COLUMN_0");
-        String col1 = getValue(row, "COLUMN_1");
-
-        if (isEmptyRow(row)) {
-            return null;
-        }
-
-        // Fin de la section cible
-        if ("Excess/Deficit".equalsIgnoreCase(col0)) {
-            if (inTargetCashSummary) {
-                stopParsing = true;
-            }
-            resetCurrentSubBlock();
-            return null;
-        }
-
-        // Détection d'un Cash Summary
-        if ("Cash Summary".equalsIgnoreCase(col0)) {
-            cashSummarySeen = true;
-            inTargetCashSummary = false;
-            resetCurrentSubBlock();
-            expectingDescription = true;
-            return null;
-        }
-
-        // Tant qu'on n'a pas vu de Cash Summary, on ignore
-        if (!cashSummarySeen) {
-            return null;
-        }
-
-        // Ligne description
-        if (expectingDescription) {
-            if (!col0.isEmpty() && col1.isEmpty() && !isTotalLine(col0)) {
-                currentDescription = col0;
-                expectingDescription = false;
-                expectingHeaders = true;
-            }
-            return null;
-        }
-
-        // Ligne header
-        if (expectingHeaders) {
-            currentHeaders = extractHeaders(row);
-
-            // On démarre seulement si ce header contient "Opening"
-            if (containsHeader(currentHeaders, "T Opening Balance")) {
-                inTargetCashSummary = true;
-                insideDataBlock = true;
-            } else {
-                // mauvais Cash Summary ou mauvais sous-bloc
-                insideDataBlock = false;
-            }
-
-            expectingHeaders = false;
-            return null;
-        }
-
-        // Ligne Total => fin du sous-bloc courant
-        if (isTotalLine(col0)) {
-            insideDataBlock = false;
-            currentDescription = null;
-            currentHeaders.clear();
-
-            // Tant qu'on est dans la bonne section Cash Summary,
-            // on peut attendre un autre sous-bloc
-            if (!stopParsing) {
-                expectingDescription = true;
-            }
-            return null;
-        }
-
-        // Si on n'est pas dans le bon Cash Summary, on ignore
-        if (!inTargetCashSummary) {
-            return null;
-        }
-
-        // Si on n'est pas dans un bloc de données, on ignore
-        if (!insideDataBlock) {
-            return null;
-        }
-
-        // Construire la ligne résultat
-        TreeMap<String, String> parsedRow = new TreeMap<>();
-        parsedRow.put("DESCRIPTION", currentDescription);
-
-        for (int i = 0; i <= 13; i++) {
-            String header = getHeader(i);
-            if (header == null || header.trim().isEmpty()) {
-                continue;
-            }
-
-            String value = getValue(row, "COLUMN_" + i);
-            parsedRow.put(header, value);
-        }
-
-        if (hasNoData(parsedRow)) {
-            return null;
-        }
-
-        result.put(resultIndex++, parsedRow);
-        return parsedRow;
+    if (!rows || rows.length === 0) {
+      alert("No ticket selected");
+      return;
     }
 
-    private void resetCurrentSubBlock() {
-        expectingDescription = false;
-        expectingHeaders = false;
-        insideDataBlock = false;
-        currentDescription = null;
-        currentHeaders.clear();
+    let nb = rows.length;
+    let msg = "Are you sure you want to close " + nb + " ticket" + (nb > 1 ? "s" : "") + " ?";
+
+    if (!confirm(msg)) {
+      return;
     }
 
-    private boolean containsHeader(List<String> headers, String searchedText) {
-        if (headers == null || searchedText == null) {
-            return false;
+    let promises = rows.map(row => {
+      let key = row.getData()['KEY'];
+
+      return callApis([
+        {
+          arcturus: 'caceis\\jirah\\closeticket',
+          context: {
+            KEY: key,
+            TOKEN: variablesViews[tabID].param.TOKEN
+          },
+          parameter: {}
         }
+      ])
+      .then(function() {
+        console.log("CLOSED TICKET: " + key);
+        return { key: key, success: true };
+      })
+      .catch(function(err) {
+        console.log("ERROR CLOSING:", key, err);
+        return { key: key, success: false, error: err };
+      });
+    });
 
-        for (String header : headers) {
-            if (header != null && header.toUpperCase().contains(searchedText.toUpperCase())) {
-                return true;
-            }
+    Promise.all(promises).then(function(results) {
+      let ok = results.filter(r => r.success).length;
+      let ko = results.filter(r => !r.success).length;
+
+      if (ko === 0) {
+        alert(ok + " ticket" + (ok > 1 ? "s" : "") + " closed successfully.");
+      } else {
+        alert(ok + " closed / " + ko + " failed.");
+      }
+
+      // refresh si tu veux
+      // loadedViews['caceis/jirah/jirah_iso_9001'].run(
+      //   variablesViews[tabID].viewRef,
+      //   tabID,
+      //   variablesViews[tabID].param
+      // );
+    });
+  }
+}
+
+
+
+
+{
+  label:'Comment Tickets',
+  onClick:function(e,tabID) {
+    console.log(tabID);
+
+    let table = Tabulator.findTable("#"+tabID+"-Result")[0];
+
+    if (!table) {
+      alert("Table not found");
+      return;
+    }
+
+    let rows = table.getSelectedRows();
+
+    if (!rows || rows.length === 0) {
+      alert("No ticket selected");
+      return;
+    }
+
+    let comment = prompt("Write the comment to add in JIRAH:");
+
+    if (comment === null) {
+      return;
+    }
+
+    comment = comment.trim();
+
+    if (comment.length === 0) {
+      alert("Comment is empty");
+      return;
+    }
+
+    let nb = rows.length;
+    let msg = "Are you sure you want to add this comment to " + nb + " ticket" + (nb > 1 ? "s" : "") + " ?";
+
+    if (!confirm(msg)) {
+      return;
+    }
+
+    let promises = rows.map(row => {
+      let key = row.getData()['KEY'];
+
+      return callApis([
+        {
+          arcturus: 'caceis\\jirah\\commentTicket',
+          context: {
+            KEY: key,
+            TOKEN: variablesViews[tabID].param.TOKEN,
+            COMMENT: comment
+          },
+          parameter: {}
         }
-        return false;
-    }
+      ])
+      .then(function() {
+        console.log("COMMENT ADDED:", key);
+        return { key: key, success: true };
+      })
+      .catch(function(err) {
+        console.log("ERROR COMMENTING:", key, err);
+        return { key: key, success: false, error: err };
+      });
+    });
 
-    private String getHeader(int index) {
-        if (index < 0 || index >= currentHeaders.size()) {
-            return "";
-        }
-        return currentHeaders.get(index);
-    }
+    Promise.all(promises).then(function(results) {
+      let ok = results.filter(r => r.success).length;
+      let ko = results.filter(r => !r.success).length;
 
-    private List<String> extractHeaders(Map row) {
-        List<String> headers = new ArrayList<>();
-        for (int i = 0; i <= 13; i++) {
-            headers.add(getValue(row, "COLUMN_" + i));
-        }
-        return headers;
-    }
+      if (ko === 0) {
+        alert("Comment added in JIRAH ticket" + (ok > 1 ? "s" : "") + ".");
+      } else {
+        alert("Comment added on " + ok + " ticket" + (ok > 1 ? "s" : "") + " / " + ko + " failed.");
+      }
 
-    private boolean isTotalLine(String value) {
-        return value != null && value.trim().toUpperCase().startsWith("TOTAL");
-    }
-
-    private String getValue(Map row, String key) {
-        Object value = row.get(key);
-        return value == null ? "" : value.toString().trim();
-    }
-
-    private boolean isEmptyRow(Map row) {
-        for (int i = 0; i <= 13; i++) {
-            Object value = row.get("COLUMN_" + i);
-            if (value != null && !value.toString().trim().isEmpty()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean hasNoData(TreeMap<String, String> row) {
-        for (Map.Entry<String, String> entry : row.entrySet()) {
-            if (!"DESCRIPTION".equals(entry.getKey())
-                    && entry.getValue() != null
-                    && !entry.getValue().trim().isEmpty()) {
-                return false;
-            }
-        }
-        return true;
-    }
+      // refresh si besoin
+      // loadedViews['caceis/jirah/jirah_iso_9001'].run(
+      //   variablesViews[tabID].viewRef,
+      //   tabID,
+      //   variablesViews[tabID].param
+      // );
+    });
+  }
 }
