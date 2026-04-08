@@ -1,66 +1,54 @@
           
-      let root = document.getElementById(tabID + "-Result");
-
-root.innerHTML = `
-  <div style="
-    text-align:center;
-    font-size:26px;
-    font-weight:700;
-    color:white;
-    margin-bottom:10px;
-  ">
-    RECONCILIATION DASHBOARD
-  </div>
-
-  <div id="${tabID}-Table"></div>
-`;
+<div id="${tabID}-AmountsSummary"
+     style="margin-top:10px; padding:10px; background:#161616; border:1px solid #333; color:white;">
+</div>
 
 
+function renderAmountsSummary(tabID, rows){
+    let sumGP = 0;
+    let sumBroker = 0;
 
-root.innerHTML = `
-  <div style="
-    text-align:center;
-    padding:12px;
-    background:#1e1e1e;
-    border-bottom:1px solid #333;
-    margin-bottom:10px;
-  ">
-    <div style="font-size:24px; font-weight:700; color:#fff;">
-      RECONCILIATION DASHBOARD
-    </div>
-    <div style="font-size:14px; color:#aaa;">
-      ${form?.PORTEFEUILLE || ""}
-    </div>
-  </div>
+    (rows || []).forEach(r => {
+        sumGP += Number(r.AMOUNT_GP) || 0;
+        sumBroker += Number(r.AMOUNT_BROKER) || 0;
+    });
 
-  <div id="${tabID}-Table"></div>
-`;
+    const diff = sumGP - sumBroker;
 
-new Tabulator("#"+tabID+"-Table", {
-       
-       
-       
-       
-       
-       
-       
-       
-       
-       
-       root.innerHTML = `
-  <div style="
-    text-align:center;
-    padding:15px;
-    background:#1e1e1e;
-    border-bottom:2px solid #2c2c2c;
-    margin-bottom:15px;
-  ">
-    <div style="font-size:26px; font-weight:700; color:#fff;">
-      RECONCILIATION DASHBOARD
-    </div>
+    const el = document.getElementById(tabID + "-AmountsSummary");
+    if(!el) return;
 
-    <div style="font-size:16px; color:#aaa;">
-      ${form.PORTEFEUILLE} - Cash Positions
-    </div>
-  </div>
-`;                 
+    el.innerHTML = `
+        <div style="display:flex; justify-content:space-around; font-size:14px;">
+            <div>💰 GP: <b>${sumGP.toLocaleString()}</b></div>
+            <div>🏦 Broker: <b>${sumBroker.toLocaleString()}</b></div>
+            <div>⚖️ Diff: <b style="color:${diff===0?'#71B86F':'#ff4d4f'}">
+                ${diff.toLocaleString()}
+            </b></div>
+        </div>
+    `;
+}
+
+
+
+
+
+
+renderAmountsSummary(tabID, table.getData("active"));
+
+
+
+table.on("dataFiltered", function(filters, rows){
+    const activeData = rows.map(r => r.getData());
+
+    renderStatusDonut(view, tabID, activeData, suffix);
+    renderAmountsSummary(tabID, activeData);   // 👈 AJOUT
+});
+
+
+
+
+renderAmountsSummary(tabID, table.getData("active"));
+
+
+renderAmountsSummary(tabID, table.getData("active"));
