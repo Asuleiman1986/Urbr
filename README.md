@@ -1,144 +1,197 @@
-root.innerHTML = `
-<div style="text-align:center;font-size:24px;font-weight:700;letter-spacing:1px;color:rgba(209,232,238,.95);margin-bottom:14px;text-transform:uppercase;">
-HISTORIQUE INVENTAIRE SUMMARY - DATE|${form.DTE}
-</div>
+function buildTicketAction(row) {
 
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px;margin-bottom:15px;align-items:start;">
+    let key = row.KEY;
 
-<div style="border:1px solid #333;background:#161616;padding:12px;min-height:300px;">
-<div style="color:rgba(209,232,238,.85);font-weight:700;margin-bottom:10px;">APPLICATION</div>
-<div id="${tabID}-APPLICATIONButtons" style="max-height:240px;overflow:auto;"></div>
-</div>
+    let appli = (row.APPLICATION || "").toLowerCase().trim();
+    let summary = (row.SUMMARY || "").toLowerCase().trim();
+    let description = (row.DESCRIPTION || "").toLowerCase().trim();
 
-<div style="border:1px solid #333;background:#161616;padding:12px;min-height:300px;">
-<div id="${tabID}-ApplicationTitle" style="color:rgba(209,232,238,.85);font-weight:700;margin-bottom:8px;">POSITIONS BY APPLICATION</div>
-<div style="height:230px;"><canvas id="${tabID}-ApplicationChart"></canvas></div>
-<div style="margin-top:6px;">Rows active : <b id="${tabID}-ApplicationCount"></b></div>
-</div>
+    let comment = null;
+    let status = null;
 
-<div style="border:1px solid #333;background:#161616;padding:12px;min-height:300px;">
-<div id="${tabID}-AssetTypeTitle" style="color:rgba(209,232,238,.85);font-weight:700;margin-bottom:8px;">POSITIONS BY ASSET TYPE</div>
-<div style="height:230px;"><canvas id="${tabID}-AssetTypeChart"></canvas></div>
-<div style="margin-top:6px;">Rows active : <b id="${tabID}-AssetTypeCount"></b></div>
-</div>
+    // =====================================================
+    // APPLICATION
+    // =====================================================
 
-</div>
+    if (appli === "gp3-rappro" || appli === "gpc-rappro") {
 
-<div id="${tabID}-Table" style="background-color:#161616"></div>
-`;
-    
-    
-    
-    
-    });
+        comment = "Veuillez joindre le document de Rappro en PJ";
+        status = "En attente de complément d'information";
+
+    } else if (appli === "gp3-crater" || appli === "gpc-crater") {
+
+        comment = "Veuillez joindre la capture d'écran CRATER en PJ";
+        status = "En attente de complément d'information";
+
+    } else if (appli === "gp3-rapide" || appli === "gpc-rapide") {
+
+        comment =
+            "Veuillez préciser le numéro de transaction et de portefeuille. " +
+            "Interdiction d'ajouter des pièces jointes, sauf en cas confirmé de demande en masse.";
+
+        status = "En attente de complément d'information";
+
+    } else if (appli === "olis fa-rapide") {
+
+        comment = "Veuillez joindre le document SUIVL en PJ";
+        status = "En attente de complément d'information";
+
+    } else if (appli === "frais de gestion variables") {
+
+        comment =
+            "Veuillez fournir les éléments suivants :\n\n" +
+            "- Capture d'écran de la macro de contrôle\n" +
+            "- Lien vers le fichier répertorié sur le réseau\n" +
+            "- Indication de la part concernée\n" +
+            "- Date de VL depuis laquelle l'écart est constaté.";
+
+        status = "En attente de complément d'information";
+
+    } else if (appli === "fastcheck") {
+
+        comment =
+            "Veuillez joindre une capture d'écran de l'anomalie (Croix rouges / grises / sablier).";
+
+        status = "En attente de complément d'information";
+    }
+
+    // =====================================================
+    // SUMMARY
+    // =====================================================
+
+    if (summary.includes("fastmatch")) {
+
+        status = "Fermée";
+    }
+
+    if (summary.includes("tribank")) {
+
+        comment = "Veuillez diriger votre demande vers le Jira Tribank";
+        status = "Fermée";
+    }
+
+    if (summary.includes("swift") && summary.includes("flux")) {
+
+        comment = "Veuillez diriger votre demande vers le Jira Flux";
+        status = "Fermée";
+    }
+
+    if (summary.includes("gp lux")) {
+
+        comment = "Veuillez diriger votre demande vers OPSU";
+        status = "Fermée";
+    }
+
+    if (
+        summary.includes("custodian") &&
+        (
+            summary.includes("flux") ||
+            summary.includes("stuck") ||
+            summary.includes("bloqué") ||
+            summary.includes("olis")
+        )
+    ) {
+
+        comment = "Veuillez-vous adresser à votre Relationship Manager";
+        status = "Fermée";
+    }
+
+    if (
+        summary.includes("détruire") &&
+        (
+            summary.includes("parhdg") ||
+            summary.includes("acthdg")
+        )
+    ) {
+
+        comment = "Vous disposez de la main pour effectuer l'action demandée";
+        status = "Fermée";
+    }
+
+    if (
+        summary.includes("rattach") &&
+        summary.includes("hedge")
+    ) {
+
+        status = "Fermée";
+    }
+
+    if (
+        summary.includes("déséquilibre") &&
+        summary.includes("parts hedgées")
+    ) {
+
+        comment = "Veuillez joindre le RAPPROGC et le LACTHDG";
+        status = "Informations";
+    }
+
+    // =====================================================
+    // DESCRIPTION
+    // =====================================================
+
+    if (
+        description.includes("swift") &&
+        description.includes("fastmatch")
+    ) {
+
+        comment = "Veuillez diriger votre demande vers le Jira MIDL";
+        status = "Fermée";
+    }
+
+    if (
+        description.includes("custodian") &&
+        (
+            description.includes("flux") ||
+            description.includes("stuck") ||
+            description.includes("bloqué") ||
+            description.includes("olis")
+        )
+    ) {
+
+        comment = "Veuillez-vous adresser à votre Relationship Manager";
+        status = "Fermée";
+    }
+
+    if (
+        description.includes("détruire") &&
+        (
+            description.includes("parhdg") ||
+            description.includes("acthdg")
+        )
+    ) {
+
+        comment = "Vous disposez de la main pour effectuer l'action demandée";
+        status = "Fermée";
+    }
+
+    if (
+        description.includes("rattach") &&
+        description.includes("hedge")
+    ) {
+
+        status = "Fermée";
+    }
+
+    if (
+        description.includes("déséquilibre") &&
+        description.includes("parts hedgées")
+    ) {
+
+        comment = "Veuillez joindre le RAPPROGC et le LACTHDG";
+        status = "Informations";
+    }
+
+    // =====================================================
+    // Aucune action
+    // =====================================================
+
+    if (comment === null && status === null) {
+        return null;
+    }
+
+    return {
+        key: key,
+        comment: comment,
+        status: status
+    };
 }
-
-function getDashboardSuffix(view) {
-    return view._selectedAPPLICATION && view._selectedAPPLICATION !== "ALL"
-        ? view._selectedAPPLICATION
-        : "ALL";
-}
-
-function renderDashboardCharts(view, tabID, rows) {
-    const suffix = getDashboardSuffix(view);
-
-    renderDonut(
-        view,
-        "_applicationChart",
-        tabID + "-ApplicationChart",
-        rows,
-        COL_APPLICATION,
-        tabID + "-ApplicationTitle",
-        tabID + "-ApplicationCount",
-        "POSITIONS BY APPLICATION (" + suffix + ")",
-        APPLICATION_ORDER,
-        APPLICATION_COLORS
-    );
-
-    renderDonut(
-        view,
-        "_assetTypeChart",
-        tabID + "-AssetTypeChart",
-        rows,
-        COL_ASSET_TYPE,
-        tabID + "-AssetTypeTitle",
-        tabID + "-AssetTypeCount",
-        "POSITIONS BY ASSET TYPE (" + suffix + ")",
-        null,
-        null
-    );
-}
-
-******
-
-root.innerHTML = `
-<div style="text-align:center; font-size:24px; font-weight:700; letter-spacing:1px;
-            color:rgba(209,232,238,0.95); margin-bottom:14px; text-transform:uppercase;">
-    HISTORIQUE INVENTAIRE SUMMARY - DATE|${form.DTE}
-</div>
-
-<div style="display:flex; justify-content:center; gap:14px; margin-bottom:14px; align-items:stretch;">
-
-    <div style="width:32%; min-height:300px; border:1px solid #333; padding:12px; background:#161616; box-sizing:border-box;">
-        <div style="color:rgba(209,232,238,0.85); font-weight:700; margin-bottom:10px; text-transform:uppercase;">
-            APPLICATION
-        </div>
-        <div id="${tabID}-APPLICATIONButtons" style="max-height:240px; overflow:auto;"></div>
-    </div>
-
-    <div style="width:32%; min-height:300px; border:1px solid #333; padding:12px; background:#161616; box-sizing:border-box;">
-        <div id="${tabID}-ApplicationTitle"
-             style="color:rgba(209,232,238,0.85); font-weight:700; margin-bottom:8px; text-transform:uppercase;">
-            POSITIONS BY APPLICATION
-        </div>
-        <div style="height:230px;">
-            <canvas id="${tabID}-ApplicationChart"></canvas>
-        </div>
-        <div style="margin-top:6px; color:rgba(209,232,238,0.75); font-size:13px;">
-            Rows active: <b id="${tabID}-ApplicationCount" style="color:#fff;"></b>
-        </div>
-    </div>
-
-    <div style="width:32%; min-height:300px; border:1px solid #333; padding:12px; background:#161616; box-sizing:border-box;">
-        <div id="${tabID}-AssetTypeTitle"
-             style="color:rgba(209,232,238,0.85); font-weight:700; margin-bottom:8px; text-transform:uppercase;">
-            POSITIONS BY ASSET TYPE
-        </div>
-        <div style="height:230px;">
-            <canvas id="${tabID}-AssetTypeChart"></canvas>
-        </div>
-        <div style="margin-top:6px; color:rgba(209,232,238,0.75); font-size:13px;">
-            Rows active: <b id="${tabID}-AssetTypeCount" style="color:#fff;"></b>
-        </div>
-    </div>
-
-</div>
-
-<div id="${tabID}-Table" style="background-color:#161616"></div>
-`;
-
-
-
-const allRows = o.Result || [];
-
-view._selectedAPPLICATION = "ALL";
-
-renderApplicationButtons(view, tabID, table, allRows);
-renderDashboardCharts(view, tabID, table.getData("active"));
-
-table.on("dataFiltered", function(filters, rows) {
-    const activeData = rows.map(row => row.getData());
-
-    renderApplicationButtons(view, tabID, table, allRows);
-    renderDashboardCharts(view, tabID, activeData);
-});
-
-table.on("dataChanged", function() {
-    renderApplicationButtons(view, tabID, table, allRows);
-    renderDashboardCharts(view, tabID, table.getData("active"));
-});
-
-
-
-
-*******
