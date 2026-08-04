@@ -1,3 +1,249 @@
+Ajoute cette fonction après renderStatusDonut
+function renderQuantitySummary(tabID, rows) {
+    let sumQuantity = 0;
+    let sumQuantityGP = 0;
+
+    (rows || []).forEach(r => {
+        sumQuantity += Number(r.QUANTITY) || 0;
+        sumQuantityGP += Number(r.QUANTITY_GP) || 0;
+    });
+
+    const diff = sumQuantityGP - sumQuantity;
+
+    const el = document.getElementById(tabID + "-QuantitySummary");
+    if (!el) return;
+
+    el.innerHTML = `
+        <div style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:20px;
+            padding:10px 12px;
+            font-size:14px;
+        ">
+            <div style="flex:1;">
+                <div style="color:rgba(209,232,238,0.70); font-size:12px;">
+                    QUANTITY
+                </div>
+                <div style="font-weight:700; color:#fff;">
+                    ${sumQuantity.toLocaleString()}
+                </div>
+            </div>
+
+            <div style="flex:1;">
+                <div style="color:rgba(209,232,238,0.70); font-size:12px;">
+                    QUANTITY GP
+                </div>
+                <div style="font-weight:700; color:#fff;">
+                    ${sumQuantityGP.toLocaleString()}
+                </div>
+            </div>
+
+            <div style="flex:1;">
+                <div style="color:rgba(209,232,238,0.70); font-size:12px;">
+                    DIFFERENCE
+                </div>
+                <div style="
+                    font-weight:700;
+                    color:${diff === 0 ? "#71886f" : "#f4d4df"};
+                ">
+                    ${diff.toLocaleString()}
+                </div>
+            </div>
+        </div>
+    `;
+}
+2. Dans ton root.innerHTML
+Dans le bloc COUNTERPARTY, juste après :
+HTML
+<div id="${tabID}-CTPYButtons" style="max-height:120px; overflow:auto;"></div>
+ajoute :
+HTML
+<div
+    id="${tabID}-QuantitySummary"
+    style="
+        margin-top:10px;
+        border-top:1px solid #333;
+        background:#161616;
+    ">
+</div>
+<div style="width:520px; border:1px solid #333; padding:10px; background:#161616; box-sizing:border-box;">
+    <div style="
+        color:rgba(209,232,238,0.85);
+        font-weight:600;
+        margin-bottom:8px;
+        text-transform:uppercase;
+    ">
+        COUNTERPARTY
+    </div>
+
+    <div
+        id="${tabID}-CTPYButtons"
+        style="max-height:120px; overflow:auto;">
+    </div>
+
+    <div
+        id="${tabID}-QuantitySummary"
+        style="
+            margin-top:10px;
+            border-top:1px solid #333;
+            background:#161616;
+        ">
+    </div>
+</div>
+Ton bloc de gauche devient donc :
+HTML
+3. Appelle la fonction au chargement initial
+Après :
+renderCTPYButtons(view, tabID, table, view._CTPYList);
+renderStatusDonut(view, tabID, table.getData("active"), "ALL");
+ajoute :
+renderQuantitySummary(tabID, table.getData("active"));
+4. Mets à jour les sommes lors des filtres
+Dans :
+table.on("dataFiltered", function(filters, rows) {
+ajoute après renderStatusDonut(...) :
+renderQuantitySummary(tabID, activeData);
+Le bloc complet devient :
+table.on("dataFiltered", function(filters, rows) {
+    const activeData = rows.map(r => r.getData());
+
+    const suffix =
+        (view._selectedCTPY && view._selectedCTPY !== "ALL")
+            ? ("CTPY: " + view._selectedCTPY)
+            : "FILTERED";
+
+    renderStatusDonut(view, tabID, activeData, suffix);
+    renderQuantitySummary(tabID, activeData);
+});
+5. Mets aussi à jour après modification du tableau
+Dans :
+table.on("dataChanged", function() {
+ajoute :
+renderQuantitySummary(tabID, table.getData("active"));
+Donc :
+table.on("dataChanged", function() {
+    const activeData = table.getData("active");
+
+    renderStatusDonut(
+        view,
+        tabID,
+        activeData,
+        (view._selectedCTPY && view._selectedCTPY !== "ALL")
+            ? ("CTPY: " + view._selectedCTPY)
+            : "ALL"
+    );
+
+    renderQuantitySummary(tabID, activeData);
+});
+
+
+
+
+
+
+1. Ajoute cette fonction après renderStatusDonut
+function renderQuantitySummary(tabID, rows) {
+    let sumQuantity = 0;
+    let sumQuantityGP = 0;
+
+    (rows || []).forEach(r => {
+        sumQuantity += Number(r.QUANTITY) || 0;
+        sumQuantityGP += Number(r.QUANTITY_GP) || 0;
+    });
+
+    const diff = sumQuantityGP - sumQuantity;
+
+    const el = document.getElementById(tabID + "-QuantitySummary");
+    if (!el) return;
+
+    el.innerHTML = `
+        <div style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:20px;
+            padding:10px 12px;
+            font-size:14px;
+        ">
+            <div style="flex:1;">
+                <div style="color:rgba(209,232,238,0.70); font-size:12px;">
+                    QUANTITY
+                </div>
+                <div style="font-weight:700; color:#fff;">
+                    ${sumQuantity.toLocaleString()}
+                </div>
+            </div>
+
+            <div style="flex:1;">
+                <div style="color:rgba(209,232,238,0.70); font-size:12px;">
+                    QUANTITY GP
+                </div>
+                <div style="font-weight:700; color:#fff;">
+                    ${sumQuantityGP.toLocaleString()}
+                </div>
+            </div>
+
+            <div style="flex:1;">
+                <div style="color:rgba(209,232,238,0.70); font-size:12px;">
+                    DIFFERENCE
+                </div>
+                <div style="
+                    font-weight:700;
+                    color:${diff === 0 ? "#71886f" : "#f4d4df"};
+                ">
+                    ${diff.toLocaleString()}
+                </div>
+            </div>
+        </div>
+    `;
+}
+2. Dans ton root.innerHTML
+Dans le bloc COUNTERPARTY, juste après :
+HTML
+<div id="${tabID}-CTPYButtons" style="max-height:120px; overflow:auto;"></div>
+ajoute :
+HTML
+<div
+    id="${tabID}-QuantitySummary"
+    style="
+        margin-top:10px;
+        border-top:1px solid #333;
+        background:#161616;
+    ">
+</div>
+<div style="width:520px; border:1px solid #333; padding:10px; background:#161616; box-sizing:border-box;">
+    <div style="
+        color:rgba(209,232,238,0.85);
+        font-weight:600;
+        margin-bottom:8px;
+        text-transform:uppercase;
+    ">
+        COUNTERPARTY
+    </div>
+
+    <div
+        id="${tabID}-CTPYButtons"
+        style="max-height:120px; overflow:auto;">
+    </div>
+
+    <div
+        id="${tabID}-QuantitySummary"
+        style="
+            margin-top:10px;
+            border-top:1px solid #333;
+            background:#161616;
+        ">
+    </div>
+</div>
+Ton bloc de gauche devient donc :
+HTML
+
+
+
+
+
 Voici une base propre et extensible en Java.
 import java.time.DayOfWeek;
 import java.time.LocalDate;
