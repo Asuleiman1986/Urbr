@@ -1,80 +1,95 @@
-Ajoute cette fonction après renderStatusDonut
-function renderQuantitySummary(tabID, rows) {
-    let sumQuantity = 0;
-    let sumQuantityGP = 0;
+  Stores the specific characteristics of foreign
+exchange forward (FX Forward) instruments, including the currencies
+exchanged, counterparty, nominal amount, spot and forward exchange
+rates, maturity, fixing, settlement and trading information. Each
+instrument is identified by a CODE_VALEUR, which can be used to link the
+FX Forward characteristics to other instrument and position data.
 
-    (rows || []).forEach(r => {
-        sumQuantity += Number(r.QUANTITY) || 0;
-        sumQuantityGP += Number(r.QUANTITY_GP) || 0;
-    });
+COLUMN DEFINITIONS
 
-    const diff = sumQuantityGP - sumQuantity;
+CODE_CONTREPARTIE Identifies the counterparty with which the FX Forward
+contract was entered into.
 
-    const el = document.getElementById(tabID + "-QuantitySummary");
-    if (!el) return;
+CODE_DEVISE_REGL Identifies the currency used for the settlement of the
+FX Forward contract.
 
-    el.innerHTML = `
-        <div style="
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            gap:20px;
-            padding:10px 12px;
-            font-size:14px;
-        ">
-            <div style="flex:1;">
-                <div style="color:rgba(209,232,238,0.70); font-size:12px;">
-                    QUANTITY
-                </div>
-                <div style="font-weight:700; color:#fff;">
-                    ${sumQuantity.toLocaleString()}
-                </div>
-            </div>
+CODE_FIXING_REGL Identifies the fixing rule or fixing reference used for
+the settlement of the FX Forward contract.
 
-            <div style="flex:1;">
-                <div style="color:rgba(209,232,238,0.70); font-size:12px;">
-                    QUANTITY GP
-                </div>
-                <div style="font-weight:700; color:#fff;">
-                    ${sumQuantityGP.toLocaleString()}
-                </div>
-            </div>
+CODE_INTERM_NEGOCE_1 Identifies the intermediary involved in the
+negotiation of the FX Forward contract.
 
-            <div style="flex:1;">
-                <div style="color:rgba(209,232,238,0.70); font-size:12px;">
-                    DIFFERENCE
-                </div>
-                <div style="
-                    font-weight:700;
-                    color:${diff === 0 ? "#71886f" : "#f4d4df"};
-                ">
-                    ${diff.toLocaleString()}
-                </div>
-            </div>
-        </div>
-    `;
-}
-2. Dans ton root.innerHTML
-Dans le bloc COUNTERPARTY, juste après :
-HTML
-<div id="${tabID}-CTPYButtons" style="max-height:120px; overflow:auto;"></div>
-ajoute :
-HTML
-<div
-    id="${tabID}-QuantitySummary"
-    style="
-        margin-top:10px;
-        border-top:1px solid #333;
-        background:#161616;
-    ">
-</div>
-<div style="width:520px; border:1px solid #333; padding:10px; background:#161616; box-sizing:border-box;">
-    <div style="
-        color:rgba(209,232,238,0.85);
-        font-weight:600;
-        margin-bottom:8px;
-        text-transform:uppercase;
-    ">
+CODE_VALEUR Unique internal identifier of the FX Forward instrument,
+used to link the contract to related instrument and position data.
+
+COMPENSATEUR Identifies the clearing entity or clearing agent associated
+with the FX Forward contract, when applicable.
+
+COURS_A_TERME Forward exchange rate agreed for the exchange of the two
+currencies at the maturity of the FX Forward contract.
+
+COURS_SPOT Spot exchange rate associated with the currency pair and used
+as a reference for the FX Forward contract.
+
+DATE_CREATION Date on which the FX Forward instrument or contract record
+was created.
+
+DATE_ECHEANCE Date on which the FX Forward contract reaches maturity and
+the agreed currency exchange is due to be settled.
+
+DATE_SAISIE Date on which the FX Forward information was entered or
+recorded in the system.
+
+DECALAGE_DATE_FIXING Defines the date adjustment or offset applied to
+determine the fixing date of the FX Forward contract.
+
+DELTA_VALO_CAT Indicates the valuation delta parameter associated with
+the FX Forward instrument. The exact business interpretation depends on
+the valuation rules configured in the source system.
+
+DEVISE_COTATION Identifies the quotation currency used to express the
+exchange rate of the FX Forward currency pair.
+
+DEVISE_COTEE Identifies the quoted currency of the FX Forward currency
+pair.
+
+HEURE_SAISIE Time at which the FX Forward information was entered or
+recorded in the system.
+
+ID_USERNAME Identifies the user or process that entered or last recorded
+the FX Forward information in the system.
+
+INDICATEUR_COMPENSATION Indicates whether the FX Forward contract is
+subject to a clearing process.
+
+LIB_CHANGE_A_TERME_C Short business description or label of the FX
+Forward instrument.
+
+LIB_CHANGE_A_TERME_L Long business description or label of the FX
+Forward instrument.
+
+MARCHE_NEGOCIATION Identifies the market or trading environment in which
+the FX Forward contract is negotiated.
+
+NATURE_CONTRAT Identifies the business nature or contractual type of the
+FX Forward transaction.
+
+NOMINAL Nominal amount of the FX Forward contract representing the
+contractual amount to be exchanged.
+
+PLACE_COTATION Identifies the quotation or market place associated with
+the FX Forward instrument.
+
+REMUNERATION_COTATION Specifies the remuneration or interest-related
+information associated with the quotation currency of the FX Forward
+contract.
+
+REMUNERATION_COTEE Specifies the remuneration or interest-related
+information associated with the quoted currency of the FX Forward
+contract.
+
+SENS_OPERATION Indicates the direction of the FX Forward transaction,
+defining the buy/sell orientation of the               
         COUNTERPARTY
     </div>
 
