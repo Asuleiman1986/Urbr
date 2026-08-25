@@ -1,195 +1,95 @@
-  Stores the specific characteristics of foreign
-exchange forward (FX Forward) instruments, including the currencies
-exchanged, counterparty, nominal amount, spot and forward exchange
-rates, maturity, fixing, settlement and trading information. Each
-instrument is identified by a CODE_VALEUR, which can be used to link the
-FX Forward characteristics to other instrument and position data.
+Stores the specific characteristics of futures
+contracts referenced in the system. It complements the general
+instrument information with futures-specific data such as the underlying
+instrument, contract identifier, maturity information, quotation and
+settlement currencies, trading market, quotation place, conversion
+factor, settlement method and applicable calendars. Each futures
+contract is identified by a CODE_VALEUR, which can be used to link these
+characteristics to related instrument and position data.
 
 COLUMN DEFINITIONS
 
-CODE_CONTREPARTIE Identifies the counterparty with which the FX Forward
-contract was entered into.
+CATEGORIE_VALEUR_SOUS_JACENTE Identifies the financial instrument
+category of the underlying asset on which the futures contract is based.
 
-CODE_DEVISE_REGL Identifies the currency used for the settlement of the
-FX Forward contract.
+CODE_CONTREPARTIE Identifies the counterparty associated with the
+futures contract, when applicable.
 
-CODE_FIXING_REGL Identifies the fixing rule or fixing reference used for
-the settlement of the FX Forward contract.
+CODE_EMETTEUR Identifies the issuer or entity associated with the
+futures contract.
 
-CODE_INTERM_NEGOCE_1 Identifies the intermediary involved in the
-negotiation of the FX Forward contract.
+CODE_VALEUR Unique internal identifier of the futures contract, used to
+link the contract to related instrument and position data.
 
-CODE_VALEUR Unique internal identifier of the FX Forward instrument,
-used to link the contract to related instrument and position data.
+CODE_VALEUR_SOUS_JACENTE Identifies the underlying instrument on which
+the futures contract is based.
 
-COMPENSATEUR Identifies the clearing entity or clearing agent associated
-with the FX Forward contract, when applicable.
+DATE_ECHEANCE_PREVI Expected maturity or expiration date of the futures
+contract.
 
-COURS_A_TERME Forward exchange rate agreed for the exchange of the two
-currencies at the maturity of the FX Forward contract.
+DATE_SAISIE Date on which the futures contract information was entered
+or recorded in the system.
 
-COURS_SPOT Spot exchange rate associated with the currency pair and used
-as a reference for the FX Forward contract.
+DEVISE_CONTREPARTIE Identifies the currency associated with the
+counterparty or opposite side of the futures contract.
 
-DATE_CREATION Date on which the FX Forward instrument or contract record
-was created.
+DEVISE_COTATION Identifies the currency in which the futures contract is
+quoted.
 
-DATE_ECHEANCE Date on which the FX Forward contract reaches maturity and
-the agreed currency exchange is due to be settled.
+ECHELON_COTATION Defines the minimum quotation increment or price step
+applicable to the futures contract.
 
-DATE_SAISIE Date on which the FX Forward information was entered or
-recorded in the system.
+FACTEUR_DE_CONVERSION Conversion factor applied to the futures contract
+or its underlying instrument for valuation, quotation or settlement
+purposes.
 
-DECALAGE_DATE_FIXING Defines the date adjustment or offset applied to
-determine the fixing date of the FX Forward contract.
-
-DELTA_VALO_CAT Indicates the valuation delta parameter associated with
-the FX Forward instrument. The exact business interpretation depends on
-the valuation rules configured in the source system.
-
-DEVISE_COTATION Identifies the quotation currency used to express the
-exchange rate of the FX Forward currency pair.
-
-DEVISE_COTEE Identifies the quoted currency of the FX Forward currency
-pair.
-
-HEURE_SAISIE Time at which the FX Forward information was entered or
-recorded in the system.
+HEURE_SAISIE Time at which the futures contract information was entered
+or recorded in the system.
 
 ID_USERNAME Identifies the user or process that entered or last recorded
-the FX Forward information in the system.
+the futures contract information in the system.
 
-INDICATEUR_COMPENSATION Indicates whether the FX Forward contract is
-subject to a clearing process.
+IDENTIFIANT_CONTRAT_FUTURE Identifies the specific futures contract
+according to the contract identification used in the source system.
 
-LIB_CHANGE_A_TERME_C Short business description or label of the FX
-Forward instrument.
+JOUR_ECHEANCE Specifies the day used to determine the expiration or
+maturity of the futures contract.
 
-LIB_CHANGE_A_TERME_L Long business description or label of the FX
-Forward instrument.
+LIB_CONTRAT_FUTURE_C Short business description or label of the futures
+contract.
+
+LIB_FUTURE_C Short business description or label of the futures
+instrument.
+
+LIB_FUTURE_L Long business description or label of the futures
+instrument.
 
 MARCHE_NEGOCIATION Identifies the market or trading environment in which
-the FX Forward contract is negotiated.
+the futures contract is negotiated.
+
+MODE_REGLEMENT Specifies the settlement method applicable to the futures
+contract, such as cash settlement or physical delivery, where
+applicable.
+
+MOIS_ECHEANCE Specifies the month used to determine the expiration or
+maturity of the futures contract.
 
 NATURE_CONTRAT Identifies the business nature or contractual type of the
-FX Forward transaction.
+futures contract.
 
-NOMINAL Nominal amount of the FX Forward contract representing the
-contractual amount to be exchanged.
+PLACE_COTATION Identifies the exchange or quotation place on which the
+futures contract is listed or quoted.
 
-PLACE_COTATION Identifies the quotation or market place associated with
-the FX Forward instrument.
+TYPE_CALENDRIER Identifies the calendar convention used to determine
+applicable business days for the futures contract.
 
-REMUNERATION_COTATION Specifies the remuneration or interest-related
-information associated with the quotation currency of the FX Forward
+TYPE_CALENDRIER_FERIE Identifies the holiday calendar used when
+determining business days, maturity or settlement dates for the futures
 contract.
-
-REMUNERATION_COTEE Specifies the remuneration or interest-related
-information associated with the quoted currency of the FX Forward
-contract.
-
-SENS_OPERATION Indicates the direction of the FX Forward transaction,
-defining the buy/sell orientation of the               
-        COUNTERPARTY
-    </div>
-
-    <div
-        id="${tabID}-CTPYButtons"
-        style="max-height:120px; overflow:auto;">
-    </div>
-
-    <div
-        id="${tabID}-QuantitySummary"
-        style="
-            margin-top:10px;
-            border-top:1px solid #333;
-            background:#161616;
-        ">
-    </div>
-</div>
-Ton bloc de gauche devient donc :
-HTML
-3. Appelle la fonction au chargement initial
-Après :
-renderCTPYButtons(view, tabID, table, view._CTPYList);
-renderStatusDonut(view, tabID, table.getData("active"), "ALL");
-ajoute :
-renderQuantitySummary(tabID, table.getData("active"));
-4. Mets à jour les sommes lors des filtres
-Dans :
-table.on("dataFiltered", function(filters, rows) {
-ajoute après renderStatusDonut(...) :
-renderQuantitySummary(tabID, activeData);
-Le bloc complet devient :
-table.on("dataFiltered", function(filters, rows) {
-    const activeData = rows.map(r => r.getData());
-
-    const suffix =
-        (view._selectedCTPY && view._selectedCTPY !== "ALL")
-            ? ("CTPY: " + view._selectedCTPY)
-            : "FILTERED";
-
-    renderStatusDonut(view, tabID, activeData, suffix);
-    renderQuantitySummary(tabID, activeData);
-});
-5. Mets aussi à jour après modification du tableau
-Dans :
-table.on("dataChanged", function() {
-ajoute :
-renderQuantitySummary(tabID, table.getData("active"));
-Donc :
-table.on("dataChanged", function() {
-    const activeData = table.getData("active");
-
-    renderStatusDonut(
-        view,
-        tabID,
-        activeData,
-        (view._selectedCTPY && view._selectedCTPY !== "ALL")
-            ? ("CTPY: " + view._selectedCTPY)
-            : "ALL"
-    );
-
-    renderQuantitySummary(tabID, activeData);
-});
-
-
-
-
-
-
-1. Ajoute cette fonction après renderStatusDonut
-function renderQuantitySummary(tabID, rows) {
-    let sumQuantity = 0;
-    let sumQuantityGP = 0;
-
-    (rows || []).forEach(r => {
-        sumQuantity += Number(r.QUANTITY) || 0;
-        sumQuantityGP += Number(r.QUANTITY_GP) || 0;
-    });
-
-    const diff = sumQuantityGP - sumQuantity;
-
-    const el = document.getElementById(tabID + "-QuantitySummary");
-    if (!el) return;
-
-    el.innerHTML = `
-        <div style="
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            gap:20px;
-            padding:10px 12px;
-            font-size:14px;
-        ">
-            <div style="flex:1;">
-                <div style="color:rgba(209,232,238,0.70); font-size:12px;">
-                    QUANTITY
-                </div>
-                <div style="font-weight:700; color:#fff;">
-                    ${sumQuantity.toLocaleString()}
-                </div>
-            </div>
+              
+              
+              
+              </div>
 
             <div style="flex:1;">
                 <div style="color:rgba(209,232,238,0.70); font-size:12px;">
