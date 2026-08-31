@@ -1,4 +1,29 @@
+const root = document.getElementById(tabID + "-Result");
 
+// éviter de recréer le titre plusieurs fois
+let title = document.getElementById(tabID + "-Title");
+
+if (!title) {
+
+    title = document.createElement("div");
+    title.id = tabID + "-Title";
+
+    title.innerHTML = `
+        <div style="
+            text-align:center;
+            font-size:24px;
+            font-weight:700;
+            letter-spacing:1px;
+            color:#222;
+            margin-bottom:15px;
+            text-transform:uppercase;
+        ">
+            CFD CANDRIAM - RECONCILIATION
+        </div>
+    `;
+
+    root.parentNode.insertBefore(title, root);
+}
 En Java
 Pour Vernal Equinox Day :
 public static LocalDate getVernalEquinoxDay(int year) {
