@@ -1,179 +1,140 @@
- Stores the specific characteristics of
-negotiable debt instruments referenced in the system. It complements the
-general instrument information with debt-specific data such as issuer,
-counterparty, maturity and issuance dates, nominal and redemption
-amounts, interest-rate and spread information, capitalization and
-interest periodicity, rating, settlement rules, taxation, amortization
-and optional call or put features. Each instrument is identified by a
-CODE_VALEUR, which can be used to link these characteristics to related
-instrument and position data.
+
+TABLE DEFINITION
+Stores the specific characteristics of credit derivative instruments referenced in the system. It provides information about the contract, reference entity, issuer, counterparty, notional amount, interest and payment schedule, maturity, settlement terms, credit seniority, materiality thresholds, trading information and valuation parameters. Each credit derivative is identified by a CODE_VALEUR, which can be used to link these characteristics to related instrument and position data.
 
 COLUMN DEFINITIONS
 
-CLASSE Identifies the class to which the negotiable debt instrument
-belongs according to the classification used in the source system.
+CLASSE
+Identifies the classification or business class assigned to the credit derivative.
 
-CODE_CONTREPARTIE Identifies the counterparty associated with the
-negotiable debt instrument, when applicable.
+CODE_CONTREPARTIE
+Identifies the counterparty associated with the credit derivative contract.
 
-CODE_COURBE_TAUX Identifies the interest rate curve used as a reference
-for pricing, interest calculation or valuation of the instrument.
+CODE_EMETTEUR
+Identifies the issuer associated with the credit derivative or referenced instrument.
 
-CODE_EMETTEUR Identifies the issuer of the negotiable debt instrument.
+CODE_ENTITE_REFERENCE
+Identifies the reference entity whose credit risk is used to determine the contractual protection or payoff of the credit derivative.
 
-CODE_RATING Identifies the credit rating assigned to the instrument or
-its issuer according to the rating information maintained in the source
-system.
+CODE_VALEUR
+Unique identifier of the credit derivative instrument in the system.
 
-CODE_VALEUR Unique internal identifier of the negotiable debt
-instrument, used to link the instrument to related instrument and
-position data.
+COMPENSATEUR
+Identifies the clearing member, clearing agent or entity involved in the clearing of the contract, when applicable.
 
-COURBE_SPREAD Identifies the spread curve associated with the negotiable
-debt instrument for pricing or valuation purposes.
+DATE_DEPART_INTERETS
+Date from which interest or periodic credit derivative payments start to accrue.
 
-COURBE_SPREAD_FLUX_FUTURS Identifies the spread curve used for the
-projection or valuation of future cash flows.
+DATE_ECHEANCE
+Contractual due date associated with the credit derivative or one of its payment obligations.
 
-COURBE_TAUX_FLUX_FUTURS Identifies the interest rate curve used for the
-projection or valuation of future cash flows.
+DATE_EMISSION
+Date on which the credit derivative instrument or contract was issued or created.
 
-DATE_1ERE_CAPITALISATION Date from which the first capitalization period
-of the instrument starts or is applied.
+DATE_MATURITE
+Final maturity date of the credit derivative contract.
 
-DATE_DERN_TOMBEE Date of the most recent contractual payment or maturity
-event associated with the instrument.
+DATE_PREMIERE_ECHEANCE
+Date of the first scheduled payment or contractual payment period.
 
-DATE_ECHEANCE Date on which the negotiable debt instrument reaches its
-contractual maturity.
+DATE_SAISIE
+Date on which the record was entered or last recorded in the source system.
 
-DATE_ECHEANCE_PENSION Maturity date associated with the repo or pension
-arrangement linked to the instrument, when applicable.
+DELTA_VALO_DECR
+Valuation adjustment or delta parameter used by the source system for the valuation of the credit derivative.
 
-DATE_EMISSION Date on which the negotiable debt instrument was issued.
+DEVISE_REMBOURSEMENT
+Currency in which any contractual reimbursement or settlement amount is paid.
 
-DATE_EMISSION_PENSION Issue or start date associated with the repo or
-pension arrangement linked to the instrument, when applicable.
+DEVISE_VALEUR
+Currency in which the credit derivative is denominated.
 
-DATE_PREMIERE_COTATION Date on which the negotiable debt instrument was
-first quoted or listed.
+FIN_DE_MOIS
+Indicates whether end-of-month conventions apply when calculating contractual dates.
 
-DATE_SAISIE Date on which the instrument information was entered or
-recorded in the system.
+HEURE_SAISIE
+Time at which the record was entered or updated in the source system.
 
-DELTA_VALO_CRNE Indicates the valuation delta parameter associated with
-the negotiable debt instrument. The exact business interpretation
-depends on the valuation rules configured in the source system.
+ID_USERNAME
+Identifier of the user or process that created or updated the record.
 
-DEVISE_VALEUR Identifies the currency in which the negotiable debt
-instrument is denominated.
+INDICATEUR_COMPENSATION
+Indicates whether the credit derivative is subject to clearing or compensation.
 
-EXPRESSION_COURS Specifies how the price or quotation of the negotiable
-debt instrument is expressed.
+LIB_CONTRAT_C
+Short description or short label of the credit derivative contract.
 
-FIN_DE_MOIS Indicates whether an end-of-month convention applies to the
-instrument’s date calculations.
+LIB_CONTRAT_L
+Long description or detailed label of the credit derivative contract.
 
-FLAG_CREANCE_CALL Indicates whether the negotiable debt instrument
-includes a call feature allowing early redemption under defined
-contractual conditions.
+MARCHE_NEGOCIATION
+Identifies the market or trading environment in which the credit derivative is negotiated.
 
-FLAG_CREANCE_PUT Indicates whether the negotiable debt instrument
-includes a put feature allowing the holder to request early redemption
-under defined contractual conditions.
+MODE_REGLEMENT
+Specifies the contractual settlement method used for the credit derivative.
 
-HEURE_SAISIE Time at which the instrument information was entered or
-recorded in the system.
+MONTANT_REMBOURSEMENT
+Amount payable as reimbursement or settlement under the contract, when applicable.
 
-ID_USERNAME Identifies the user or process that entered or last recorded
-the instrument information in the system.
+NATURE_CONTRAT
+Identifies the contractual nature or type of the credit derivative.
 
-LIB_CREANCE_NEGO_C Short business description or label of the negotiable
-debt instrument.
+NOM_TAUX
+Identifies the interest rate or reference rate applicable to the contract.
 
-LIB_CREANCE_NEGO_L Long business description or label of the negotiable
-debt instrument.
+NOMINAL_VALEUR
+Notional amount used as the reference amount for calculating payments, protection or settlement under the credit derivative.
 
-MARCHE_NEGOCIATION Identifies the market or trading environment in which
-the negotiable debt instrument is negotiated.
+OBJECTIF_CONTRAT
+Identifies the business or investment purpose associated with the credit derivative contract.
 
-MNEMONIQUE_VALEUR Mnemonic or abbreviated identifier used to represent
-the negotiable debt instrument in the source system.
+PERIODICITE_ECHEANCE
+Defines the frequency between scheduled payment or contractual due dates.
 
-MONTANT_EMISSION Total amount issued for the negotiable debt instrument.
+PLACE_COTATION
+Identifies the quotation or trading place associated with the credit derivative.
 
-MONTANT_REMB Amount contractually payable upon redemption of the
-negotiable debt instrument.
+QUANTIEME_CALCUL
+Specifies the day-count or date-related calculation parameter used for periodic calculations.
 
-NOM_TAUX Identifies the interest rate or reference rate applicable to
-the negotiable debt instrument.
+RANG_DERNIER_EMETTEUR
+Identifies the last issuer rank considered when the credit derivative references a range or basket of issuers.
 
-NOM_TAUX_PENSION Identifies the interest rate or reference rate
-applicable to the repo or pension arrangement associated with the
-instrument.
+RANG_PREMIER_EMETTEUR
+Identifies the first issuer rank considered when the credit derivative references a range or basket of issuers.
 
-NOMINAL_PENSION Nominal amount associated with the repo or pension
-arrangement linked to the instrument.
+REGLE_CALCUL_AJUSTEMENT
+Specifies the business rule used to adjust calculated contractual dates or amounts.
 
-NOMINAL_VALEUR Nominal or face value of the negotiable debt instrument.
+SOUS_CATEGORIE_VALEUR
+Identifies the subcategory of the credit derivative instrument, such as a specific type of credit protection or credit-linked contract.
 
-PERIODE_CAPITALISATION Defines the capitalization period applicable to
-the interest calculation of the instrument.
+SPOT_LAG
+Number of business days used as the standard settlement delay between the trade date and the effective settlement date.
 
-PERIODE_LINEARISATION Defines the period used for linearization or
-accrual allocation in the calculation of the instrument.
+SPREAD_TAUX
+Spread applied to the relevant reference rate or used to represent the contractual credit spread of the derivative.
 
-PERIODICITE_INT Defines the frequency at which interest is calculated or
-paid for the negotiable debt instrument.
+TAUX_REMBOURSEMENT
+Rate used to determine the reimbursement or settlement amount under the contract.
 
-PLACE_COTATION Identifies the exchange, market place or quotation venue
-associated with the negotiable debt instrument.
+TYPE_CALCUL_COUPON_REF
+Specifies the calculation method used for the reference coupon or periodic reference payment.
 
-PRIX_EMISSION Price at which the negotiable debt instrument was issued.
+TYPE_CALCUL_REMBOURSEMENT
+Specifies the calculation method used to determine the reimbursement or settlement amount.
 
-QUANTIEME_CALCUL Specifies the day of the relevant period used in
-contractual interest or date calculations.
+TYPE_CALENDRIER
+Identifies the business calendar used for date calculations, payment schedules and adjustments.
 
-REGLE_CALCUL_AJUSTEMENT Identifies the adjustment rule applied to
-contractual date or calculation conventions.
+TYPE_SEGNIORITE_EMETTEUR
+Identifies the issuer seniority classification used by the source system for the referenced credit obligation.
 
-SPOT_LAG Defines the number of business days between the relevant
-reference date and the applicable spot or settlement date.
+TYPE_SENIORITE_EMETTEUR
+Identifies the seniority level of the issuer's referenced debt or obligation, such as senior or subordinated debt.
 
-SPREAD_TAUX Specifies the spread applied to the reference interest rate
-of the negotiable debt instrument.
+TYPE_SEUIL_MATERIALITE
+Identifies the type of materiality threshold used when assessing whether a credit-related event or amount is significant under the contract.
 
-SPREAD_TAUX_FLUX_FUTURS Specifies the spread applied when projecting or
-valuing future cash flows of the instrument.
-
-SPREAD_TAUX_PENSION Specifies the interest rate spread applicable to the
-repo or pension arrangement associated with the instrument.
-
-SPREAD_TAUX_VALO Specifies the spread applied for valuation purposes.
-
-TYPE_AMORTISSEMENT Identifies the amortization method or schedule
-applicable to the negotiable debt instrument.
-
-TYPE_CALENDRIER Identifies the calendar convention used to determine
-applicable business days for the instrument.
-
-TYPE_CREANCE Identifies the business type or category of the negotiable
-debt instrument.
-
-TYPE_DECALAGE Identifies the convention used to shift a contractual date
-when an adjustment is required.
-
-TYPE_DELAI_REGLEMENT Identifies the settlement delay convention
-applicable to the negotiable debt instrument.
-
-TYPE_FISCALITE_VALEUR Identifies the taxation treatment or tax
-classification applicable to the negotiable debt instrument.
-
-TYPE_PENSION Identifies the type of repo or pension arrangement
-associated with the instrument, when applicable.
-
-TYPE_VALEUR_TCN Identifies the specific type of negotiable debt security
-(TCN) according to the classification used in the source system.
-
-UNITE_PERIODICITE Identifies the unit used to express a periodicity or
-frequency associated with the instrument.
+UNITE_PERIODICITE
+Defines the unit used with the periodicity value, such as days, months or years.
