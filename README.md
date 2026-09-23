@@ -1,87 +1,55 @@
-rowContextMenu: [
-    {
-        label: "Add Comment",
+rowFormatter: function(row) {
 
-        action: function(e, row) {
+    const data = row.getData();
+    const element = row.getElement();
 
-            let table = row.getTable();
+    // Style général
+    element.style.color = "#faf8fa";
+    element.style.fontWeight = "bold";
 
-            // Récupère les lignes déjà sélectionnées
-            let selectedRows = table.getSelectedRows();
+    // Récupération du commentaire
+    const comment = data.COMMENT == null
+        ? ""
+        : String(data.COMMENT).trim();
 
-            // Si aucune ligne sélectionnée,
-            // on utilise automatiquement la ligne du clic droit
-            if (selectedRows.length === 0) {
-                selectedRows = [row];
-            }
-
-            let comment = prompt(
-                "Enter comment for " +
-                selectedRows.length +
-                " row(s):"
-            );
-
-            // User clicked Cancel
-            if (comment === null) {
-                return;
-            }
-
-            comment = comment.trim();
-
-            if (comment === "") {
-                alert("Comment cannot be empty");
-                return;
-            }
-
-            // Update COMMENT for every selected row
-            selectedRows.forEach(function(selectedRow) {
-
-                selectedRow.update({
-                    COMMENT: comment
-                });
-
-            });
-        }
+    // 1. COMMENT présent
+    // La ligne est considérée comme expliquée :
+    // même couleur que OK, sans modifier STATUS
+    if (comment !== "") {
+        element.style.backgroundColor = STATUS_COLORS["OK"];
+        return;
     }
-]
-rowContextMenu: [
-    {
-        label: "Add Comment",
 
-        action: function(e, row) {
+    // 2. Pas de commentaire
+    // On reprend la couleur correspondant au STATUS
+    if (data.STATUS && STATUS_COLORS[data.STATUS]) {
+        element.style.backgroundColor = STATUS_COLORS[data.STATUS];
+    } else {
+        element.style.backgroundColor = "";
+    }
+},
 
-            let table = row.getTable();
-            let selectedRows = table.getSelectedRows();
+selectedRows.forEach(function(selectedRow) {
 
-            // Au moins une ligne doit être sélectionnée
-            if (selectedRows.length === 0) {
-                alert("Please select at least one row");
-                return;
-            }
+    selectedRow.update({
+        COMMENT: comment
+    }).then(function() {
+        selectedRow.reformat();
+    });
 
-            // Demande le commentaire
-            let comment = prompt("Enter comment:");
+});
 
-            // Cancel
-            if (comment === null) {
-                return;
-            }
 
-            comment = comment.trim();
 
-            if (comment === "") {
-                alert("Comment cannot be empty");
-                return;
-            }
 
-            // Met le commentaire sur toutes les lignes sélectionnées
-            selectedRows.forEach(function(selectedRow) {
+table.on("cellEdited", function(cell) {
 
-                selectedRow.update({
-                    COMMENT: comment
-                });
+    if (cell.getField() === "COMMENT") {
+        cell.getRow().reformat();
+    }
 
-            });
+});
+
         }
     },
 
