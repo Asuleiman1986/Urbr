@@ -1,4 +1,18 @@
-
+Subject: Asset Price vs BBG Reconciliation – Run & Report
+Hi,
+Here is a quick overview of how the Asset Price vs BBG Reconciliation works.
+After entering the required parameters (Date N, Date N-1, SICAV Code, Threshold Bps Movement, Threshold Variation Percentage, and GP), click Run to launch the reconciliation.
+The results are split into two categories:
+Under Threshold: the differences remain within the defined thresholds. The status is OK and the rows are displayed in green, even if there is a price difference between the Asset price and Bloomberg price.
+Over Threshold: at least one of the thresholds has been exceeded. In this case, there are two possible statuses:
+OK / Green: a threshold has been exceeded, but the Asset price and Bloomberg price are identical.
+DIFF / Red: a threshold has been exceeded and there is a difference between the Asset price and Bloomberg price.
+The chart shows the number of rows matching each status (OK / DIFF).
+For DIFF rows, a comment can be added to justify the difference. Multiple rows can also be selected at the same time to apply the same comment. Once a comment has been added, the status remains DIFF, as the price difference still exists, but the row turns green to indicate that the difference has been reviewed and justified.
+Finally, clicking Save saves the comments and generates the reconciliation report in the C:\Temp folder.
+Please find attached an example of the report output.
+The next step, if needed, will be to implement the row colors directly in the generated Excel report as well.
+If you need any changes or additional features, please do not hesitate to let me know.
 rowFormatter: function(row) {
 
     const data = row.getData();
