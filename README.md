@@ -1,3 +1,37 @@
+
+rowFormatter: function(row) {
+
+    const data = row.getData();
+    const element = row.getElement();
+
+    element.style.color = "#faf8fa";
+    element.style.fontWeight = "bold";
+
+    const comment = data.COMMENT == null
+        ? ""
+        : String(data.COMMENT).trim();
+
+    // Couleur métier
+    if (comment !== "") {
+        element.style.backgroundColor = STATUS_COLORS["OK"];
+    } else if (data.STATUS && STATUS_COLORS[data.STATUS]) {
+        element.style.backgroundColor = STATUS_COLORS[data.STATUS];
+    } else {
+        element.style.backgroundColor = "";
+    }
+
+    // Affichage de la sélection
+    if (row.isSelected()) {
+        element.style.outline = "3px solid white";
+        element.style.outlineOffset = "-3px";
+    } else {
+        element.style.outline = "";
+    }
+},
+
+
+
+
 rowFormatter: function(row) {
 
     const data = row.getData();
