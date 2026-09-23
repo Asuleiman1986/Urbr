@@ -5,6 +5,52 @@ rowContextMenu: [
         action: function(e, row) {
 
             let table = row.getTable();
+
+            // Récupère les lignes déjà sélectionnées
+            let selectedRows = table.getSelectedRows();
+
+            // Si aucune ligne sélectionnée,
+            // on utilise automatiquement la ligne du clic droit
+            if (selectedRows.length === 0) {
+                selectedRows = [row];
+            }
+
+            let comment = prompt(
+                "Enter comment for " +
+                selectedRows.length +
+                " row(s):"
+            );
+
+            // User clicked Cancel
+            if (comment === null) {
+                return;
+            }
+
+            comment = comment.trim();
+
+            if (comment === "") {
+                alert("Comment cannot be empty");
+                return;
+            }
+
+            // Update COMMENT for every selected row
+            selectedRows.forEach(function(selectedRow) {
+
+                selectedRow.update({
+                    COMMENT: comment
+                });
+
+            });
+        }
+    }
+]
+rowContextMenu: [
+    {
+        label: "Add Comment",
+
+        action: function(e, row) {
+
+            let table = row.getTable();
             let selectedRows = table.getSelectedRows();
 
             // Au moins une ligne doit être sélectionnée
