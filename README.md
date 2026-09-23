@@ -1,4 +1,63 @@
-DESCRIPTIF_REMERE
+rowContextMenu: [
+    {
+        label: "Add Comment",
+
+        action: function(e, row) {
+
+            let table = row.getTable();
+            let selectedRows = table.getSelectedRows();
+
+            // Au moins une ligne doit être sélectionnée
+            if (selectedRows.length === 0) {
+                alert("Please select at least one row");
+                return;
+            }
+
+            // Demande le commentaire
+            let comment = prompt("Enter comment:");
+
+            // Cancel
+            if (comment === null) {
+                return;
+            }
+
+            comment = comment.trim();
+
+            if (comment === "") {
+                alert("Comment cannot be empty");
+                return;
+            }
+
+            // Met le commentaire sur toutes les lignes sélectionnées
+            selectedRows.forEach(function(selectedRow) {
+
+                selectedRow.update({
+                    COMMENT: comment
+                });
+
+            });
+        }
+    },
+
+    {
+        label: "To Excel",
+
+        action: function(e, row) {
+
+            row.getTable().download(
+                "xlsx",
+                "Reconciliation_CFD_CANDRIAM_" +
+                parseString(form.DTE) +
+                "_" +
+                form.PORTEFEUILLE +
+                ".xlsx",
+                {
+                    sheetName: "Reconciliation GP vs KONDOR"
+                }
+            );
+        }
+    }
+]DESCRIPTIF_REMERE
 
 TABLE DEFINITION
 Stores the specific characteristics of repurchase or repurchase-option (réméré) contracts referenced in the system. It provides information about the buyer and seller, related portfolios, committed and settlement amounts, contractual dates, interest and indexation conditions, reimbursement terms, late-interest conditions, valuation parameters and settlement rules. Each contract is identified by a CODE_VALEUR, which can be used to link these characteristics to related instrument and position data.
