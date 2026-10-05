@@ -1,4 +1,50 @@
+NUMBERED_DATA AS (
+    SELECT
+        G.*,
+        ROW_NUMBER() OVER (
+            PARTITION BY
+                INST_CD,
+                CODE_PORTEFEUILLE,
+                COTATION_DT,
+                COURS,
+                COURS_DTE,
+                VALO_DT
+            ORDER BY PX_NAV
+        ) AS RN
+    FROM GROUPED_DATA G
+)
 
+SELECT
+    CODE_PORTEFEUILLE,
+    INST_CD,
+    COTATION_DT,
+    COURS,
+    COURS_DTE,
+    VALO_DT,
+
+    MAX(CASE WHEN RN = 1 THEN PX_NAV END) AS PX_NAV_1,
+    MAX(CASE WHEN RN = 1 THEN LIBS END)   AS LIBS_1,
+
+    MAX(CASE WHEN RN = 2 THEN PX_NAV END) AS PX_NAV_2,
+    MAX(CASE WHEN RN = 2 THEN LIBS END)   AS LIBS_2,
+
+    MAX(CASE WHEN RN = 3 THEN PX_NAV END) AS PX_NAV_3,
+    MAX(CASE WHEN RN = 3 THEN LIBS END)   AS LIBS_3,
+
+    MAX(CASE WHEN RN = 4 THEN PX_NAV END) AS PX_NAV_4,
+    MAX(CASE WHEN RN = 4 THEN LIBS END)   AS LIBS_4
+
+FROM NUMBERED_DATA
+
+GROUP BY
+    CODE_PORTEFEUILLE,
+    INST_CD,
+    COTATION_DT,
+    COURS,
+    COURS_DTE,
+    VALO_DT
+
+ORDER BY INST_CD;
 Hi,
 
 Following additional checks on the Asset Price vs Bloomberg comparison, I identified an issue regarding the prices currently available in GP.
